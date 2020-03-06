@@ -22,12 +22,12 @@ namespace AspNetCoreWebApi.Controllers
         }
 
         [HttpGet]
-        public IEnumerable<Course> Get()
+        public ActionResult<IEnumerable<Course>> Get()
         {
             _logger.LogInformation($"{this.GetType().Name}: Get");
             var rng = new Random();
             Array values = Enum.GetValues(typeof(Enums.TeacherType));
-            return CreateCourses();
+            return Ok(CreateCourses());
 
             IEnumerable<Course> CreateCourses()
             {
@@ -54,12 +54,12 @@ namespace AspNetCoreWebApi.Controllers
         }
 
         [HttpGet("{id}")]
-        public Course Get(long id)
+        public ActionResult<Course> Get(long id)
         {
             _logger.LogInformation($"{this.GetType().Name}: Get");
             var rng = new Random();
             Array values = Enum.GetValues(typeof(Enums.TeacherType));
-            return CreateCourse();
+            return Ok(CreateCourse());
 
             Course CreateCourse()
             {

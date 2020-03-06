@@ -23,11 +23,11 @@ namespace AspNetCoreWebApi.Controllers
         }
 
         [HttpGet]
-        public IEnumerable<Student> Get()
+        public ActionResult<IEnumerable<Student>> Get()
         {
             _logger.LogInformation($"{this.GetType().Name}: Get");
             var rng = new Random();
-            return CreateStudents();
+            return Ok(CreateStudents());
 
             IEnumerable<Student> CreateStudents()
             {
@@ -112,18 +112,43 @@ namespace AspNetCoreWebApi.Controllers
         }
 
         [HttpGet("{id}")]
-        public Student Get(long studentId)
+        public ActionResult<Student> Get(long studentId)
         {
             _logger.LogInformation($"{this.GetType().Name}: Get {studentId}");
             var rng = new Random();
             var tuitionCentreId = rng.Next(1, 5000);
-            return new Student 
+            return Ok(new Student 
             { 
                 StudentId = studentId,
                 Person = CreatePerson(),
-                TuitionAgency = new TuitionAgency { },
+                TuitionAgency = CreateAgency(tuitionCentreId),
                 CoursesRegistered = CreateCourses(tuitionCentreId)
-            };
+            });
+
+            TuitionAgency CreateAgency(long agencyId)
+            {
+                return new TuitionAgency
+                {
+                    TuitionAgencyId = agencyId,
+                    Name = Guid.NewGuid().ToString(),
+                    Branches = CreateBranches(agencyId),
+                    Courses = CreateCourses(agencyId)
+                };
+            }
+
+            ICollection<TuitionAgencyBranch> CreateBranches(long agencyId)
+            {
+                return Enumerable.Range(1, 3).Select(_ =>
+                {
+                    return new TuitionAgencyBranch
+                    {
+                        TuitionAgencyBranchId = rng.Next(1, 5000),
+                        BranchAddress = Guid.NewGuid().ToString(),
+                        BranchName = Guid.NewGuid().ToString(),
+                        TuitionAgencyId = agencyId
+                    };
+                }).ToArray();
+            }
 
             Person CreatePerson()
             {

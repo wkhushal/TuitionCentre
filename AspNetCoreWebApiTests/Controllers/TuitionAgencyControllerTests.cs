@@ -3,11 +3,12 @@ using AspNetCoreWebApi.Models;
 using AutoFixture;
 using AutoFixture.AutoMoq;
 using AutoFixture.Idioms;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using System.Collections.Generic;
 using Xunit;
 
-namespace AspNetCoreWebApiTests.Controller.Tests
+namespace AspNetCoreWebApiTests.Controllers
 {
     public class TuitionAgencyControllerTests
     {
@@ -49,14 +50,15 @@ namespace AspNetCoreWebApiTests.Controller.Tests
             {
                 sut = _fixture.Create<TuitionAgencyController>();
             }
-            IEnumerable<TuitionAgency> result;
+            ActionResult<IEnumerable<TuitionAgency>> actionResult;
             void Action()
             {
-                result = sut.Get();
+                actionResult = sut.Get();
             }
             void Asserts()
             {
-                Assert.NotNull(result);
+                Assert.NotNull(actionResult);
+                Assert.IsType<OkObjectResult>(actionResult.Result);
             }
         }
     }

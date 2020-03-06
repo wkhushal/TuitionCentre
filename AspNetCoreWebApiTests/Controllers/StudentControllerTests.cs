@@ -4,6 +4,7 @@ using AutoFixture;
 using AutoFixture.AutoMoq;
 using AutoFixture.Idioms;
 using AutoFixture.Xunit2;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using System;
 using System.Collections.Generic;
@@ -51,7 +52,7 @@ namespace AspNetCoreWebApiTests.Controllers
             {
                 sut = _fixture.Create<StudentController>();
             }
-            IEnumerable<Student> result;
+            ActionResult<IEnumerable<Student>> result;
             void Action()
             {
                 result = sut.Get();
@@ -59,6 +60,8 @@ namespace AspNetCoreWebApiTests.Controllers
             void Asserts()
             {
                 Assert.NotNull(result);
+                var okResult = Assert.IsType<OkObjectResult>(result.Result);
+                var students = Assert.IsAssignableFrom<IEnumerable<Student>>(okResult.Value);
             }
         }
 
@@ -74,7 +77,7 @@ namespace AspNetCoreWebApiTests.Controllers
             {
                 sut = _fixture.Create<StudentController>();
             }
-            Student result;
+            ActionResult<Student> result;
             void Action()
             {
                 result = sut.Get(studentId);
@@ -82,7 +85,9 @@ namespace AspNetCoreWebApiTests.Controllers
             void Asserts()
             {
                 Assert.NotNull(result);
-                Assert.Equal(studentId, result.StudentId);
+                var okResult = Assert.IsType<OkObjectResult>(result.Result);
+                var student = Assert.IsType<Student>(okResult.Value);
+                Assert.Equal(studentId, student.StudentId);
             }
         }
     }

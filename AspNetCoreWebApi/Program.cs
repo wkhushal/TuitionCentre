@@ -21,6 +21,7 @@ namespace AspNetCoreWebApi
             .Enrich.FromLogContext()
             .WriteTo.Console()
             .CreateLogger();
+
             try
             {
                 Log.Information("Starting web host");
@@ -43,7 +44,6 @@ namespace AspNetCoreWebApi
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder.UseStartup<Startup>();
-                })
-                .UseSerilog();
+                }).UseSerilog();
     }
 }

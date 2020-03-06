@@ -22,11 +22,11 @@ namespace AspNetCoreWebApi.Controllers
         }
 
         [HttpGet]
-        public IEnumerable<TuitionAgency> Get()
+        public ActionResult<IEnumerable<TuitionAgency>> Get()
         {
             _logger.LogInformation($"{this.GetType().Name}: Get");
             var rng = new Random();
-            return CreateTuitionAgencies();
+            return Ok(CreateTuitionAgencies());
 
             IEnumerable<TuitionAgency> CreateTuitionAgencies()
             {

@@ -23,12 +23,12 @@ namespace AspNetCoreWebApi.Controllers
         }
 
         [HttpGet]
-        public IEnumerable<Teacher> Get()
+        public ActionResult<IEnumerable<Teacher>> Get()
         {
             _logger.LogInformation($"{this.GetType().Name}: Get");
             var rng = new Random();
             Array values = Enum.GetValues(typeof(Enums.TeacherType));
-            return CreateTeachers();
+            return Ok(CreateTeachers());
 
             IEnumerable<Teacher> CreateTeachers()
             {

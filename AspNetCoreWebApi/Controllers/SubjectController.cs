@@ -19,11 +19,11 @@ namespace AspNetCoreWebApi.Controllers
         }
 
         [HttpGet]
-        public IEnumerable<Subject> Get()
+        public ActionResult<IEnumerable<Subject>> Get()
         {
             _logger.LogInformation($"{this.GetType().Name}: Get");
             var rng = new Random();
-            return CreateSubjects();
+            return Ok(CreateSubjects());
 
             IEnumerable<Subject> CreateSubjects()
             {
@@ -39,11 +39,11 @@ namespace AspNetCoreWebApi.Controllers
         }
 
         [HttpGet("{id}")]
-        public Subject Get(long id)
+        public ActionResult<Subject> Get(long id)
         {
             _logger.LogInformation($"{this.GetType().Name}: Get");
             var rng = new Random();
-            return CreateSubject();
+            return Ok(CreateSubject());
 
             Subject CreateSubject()
             {
