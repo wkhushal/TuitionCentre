@@ -6,6 +6,7 @@ using AutoFixture.Idioms;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using System.Collections.Generic;
 using Xunit;
+using Microsoft.AspNetCore.Mvc;
 
 namespace AspNetCoreWebApiTests.Controllers
 {
@@ -49,7 +50,7 @@ namespace AspNetCoreWebApiTests.Controllers
             {
                 sut = _fixture.Create<WeatherForecastController>();
             }
-            IEnumerable<WeatherForecast> result;
+            ActionResult<IEnumerable<WeatherForecast>> result;
             void Action()
             {
                 result = sut.Get();
@@ -57,6 +58,8 @@ namespace AspNetCoreWebApiTests.Controllers
             void Asserts()
             {
                 Assert.NotNull(result);
+                var okResult = Assert.IsType<OkObjectResult>(result.Result);
+                Assert.IsAssignableFrom<IEnumerable<WeatherForecast>>(okResult.Value);
             }
         }
     }
