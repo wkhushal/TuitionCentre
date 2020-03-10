@@ -1,4 +1,5 @@
 ﻿using AspNetCoreWebApi.Controllers;
+using AspNetCoreWebApi.DTOs.Query;
 using AspNetCoreWebApi.Models;
 using AutoFixture;
 using AutoFixture.AutoMoq;
@@ -52,7 +53,7 @@ namespace AspNetCoreWebApiTests.Controllers
             {
                 sut = _fixture.Create<TeacherController>();
             }
-            ActionResult<IEnumerable<Teacher>> result;
+            ActionResult<IEnumerable<TeacherQueryDto>> result;
             void Action()
             {
                 result = sut.Get();
@@ -61,7 +62,7 @@ namespace AspNetCoreWebApiTests.Controllers
             {
                 Assert.NotNull(result);
                 var okResult = Assert.IsType<OkObjectResult>(result.Result);
-                Assert.IsAssignableFrom<IEnumerable<Teacher>>(okResult.Value);
+                Assert.IsAssignableFrom<IEnumerable<TeacherQueryDto>>(okResult.Value);
             }
         }
     }

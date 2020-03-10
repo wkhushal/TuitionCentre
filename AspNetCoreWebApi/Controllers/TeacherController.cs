@@ -8,6 +8,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using AspNetCoreWebApi.Helper;
 using Microsoft.AspNetCore.Authorization;
+using AspNetCoreWebApi.DTOs.Query;
+using AspNetCoreWebApi.DTOs.Mapper;
 
 namespace AspNetCoreWebApi.Controllers
 {
@@ -23,12 +25,12 @@ namespace AspNetCoreWebApi.Controllers
         }
 
         [HttpGet]
-        public ActionResult<IEnumerable<Teacher>> Get()
+        public ActionResult<IEnumerable<TeacherQueryDto>> Get()
         {
             _logger.LogInformation($"{this.GetType().Name}: Get");
             var rng = new Random();
             Array values = Enum.GetValues(typeof(Enums.TeacherType));
-            return Ok(CreateTeachers());
+            return Ok(CreateTeachers().Select(teacher => teacher.ToQueryDto()));
 
             IEnumerable<Teacher> CreateTeachers()
             {

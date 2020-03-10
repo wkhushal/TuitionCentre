@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AspNetCoreWebApi.DTOs.Mapper;
+using AspNetCoreWebApi.DTOs.Query;
 using AspNetCoreWebApi.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -19,11 +21,11 @@ namespace AspNetCoreWebApi.Controllers
         }
 
         [HttpGet]
-        public ActionResult<IEnumerable<Subject>> Get()
+        public ActionResult<IEnumerable<SubjectQueryDto>> Get()
         {
             _logger.LogInformation($"{this.GetType().Name}: Get");
             var rng = new Random();
-            return Ok(CreateSubjects());
+            return Ok(CreateSubjects().Select(subject => subject.ToQueryDto()));
 
             IEnumerable<Subject> CreateSubjects()
             {
@@ -39,11 +41,11 @@ namespace AspNetCoreWebApi.Controllers
         }
 
         [HttpGet("{id}")]
-        public ActionResult<Subject> Get(long id)
+        public ActionResult<SubjectQueryDto> Get(long id)
         {
             _logger.LogInformation($"{this.GetType().Name}: Get");
             var rng = new Random();
-            return Ok(CreateSubject());
+            return Ok(CreateSubject().ToQueryDto());
 
             Subject CreateSubject()
             {

@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AspNetCoreWebApi.DTOs.Mapper;
+using AspNetCoreWebApi.DTOs.Query;
 using AspNetCoreWebApi.Helper;
 using AspNetCoreWebApi.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -23,11 +25,11 @@ namespace AspNetCoreWebApi.Controllers
         }
 
         [HttpGet]
-        public ActionResult<IEnumerable<Student>> Get()
+        public ActionResult<IEnumerable<StudentQueryDto>> Get()
         {
             _logger.LogInformation($"{this.GetType().Name}: Get");
             var rng = new Random();
-            return Ok(CreateStudents());
+            return Ok(CreateStudents().Select(item => item.ToQueryDto()));
 
             IEnumerable<Student> CreateStudents()
             {
@@ -112,18 +114,18 @@ namespace AspNetCoreWebApi.Controllers
         }
 
         [HttpGet("{id}")]
-        public ActionResult<Student> Get(long studentId)
+        public ActionResult<StudentQueryDto> Get(long studentId)
         {
             _logger.LogInformation($"{this.GetType().Name}: Get {studentId}");
             var rng = new Random();
             var tuitionCentreId = rng.Next(1, 5000);
-            return Ok(new Student 
-            { 
+            return Ok(new Student
+            {
                 StudentId = studentId,
                 Person = CreatePerson(),
                 TuitionAgency = CreateAgency(tuitionCentreId),
                 CoursesRegistered = CreateCourses(tuitionCentreId)
-            });
+            }.ToQueryDto());
 
             TuitionAgency CreateAgency(long agencyId)
             {

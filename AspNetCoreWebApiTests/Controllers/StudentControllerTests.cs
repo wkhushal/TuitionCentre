@@ -1,14 +1,12 @@
 ﻿using AspNetCoreWebApi.Controllers;
-using AspNetCoreWebApi.Models;
+using AspNetCoreWebApi.DTOs.Query;
 using AutoFixture;
 using AutoFixture.AutoMoq;
 using AutoFixture.Idioms;
 using AutoFixture.Xunit2;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
-using System;
 using System.Collections.Generic;
-using System.Text;
 using Xunit;
 
 namespace AspNetCoreWebApiTests.Controllers
@@ -52,7 +50,7 @@ namespace AspNetCoreWebApiTests.Controllers
             {
                 sut = _fixture.Create<StudentController>();
             }
-            ActionResult<IEnumerable<Student>> result;
+            ActionResult<IEnumerable<StudentQueryDto>> result;
             void Action()
             {
                 result = sut.Get();
@@ -61,7 +59,7 @@ namespace AspNetCoreWebApiTests.Controllers
             {
                 Assert.NotNull(result);
                 var okResult = Assert.IsType<OkObjectResult>(result.Result);
-                var students = Assert.IsAssignableFrom<IEnumerable<Student>>(okResult.Value);
+                var students = Assert.IsAssignableFrom<IEnumerable<StudentQueryDto>>(okResult.Value);
             }
         }
 
@@ -77,7 +75,7 @@ namespace AspNetCoreWebApiTests.Controllers
             {
                 sut = _fixture.Create<StudentController>();
             }
-            ActionResult<Student> result;
+            ActionResult<StudentQueryDto> result;
             void Action()
             {
                 result = sut.Get(studentId);
@@ -86,7 +84,7 @@ namespace AspNetCoreWebApiTests.Controllers
             {
                 Assert.NotNull(result);
                 var okResult = Assert.IsType<OkObjectResult>(result.Result);
-                var student = Assert.IsType<Student>(okResult.Value);
+                var student = Assert.IsType<StudentQueryDto>(okResult.Value);
                 Assert.Equal(studentId, student.StudentId);
             }
         }
