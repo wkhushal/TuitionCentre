@@ -41,7 +41,11 @@ namespace AspNetCoreWebApi
             {
                 app.UseDeveloperExceptionPage();
             }
-            
+            else
+            {
+                app.UseExceptionHandler("/error");
+            }
+
             app.UseSerilogRequestLogging();
 
             app.UseHttpsRedirection();
