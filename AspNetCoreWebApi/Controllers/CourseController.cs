@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AspNetCoreWebApi.Attributes;
+using AspNetCoreWebApi.DTOs.Mapper;
+using AspNetCoreWebApi.DTOs.Query;
 using AspNetCoreWebApi.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -22,12 +24,12 @@ namespace AspNetCoreWebApi.Controllers
         }
 
         [HttpGet]
-        public ActionResult<IEnumerable<Course>> Get()
+        public ActionResult<IEnumerable<CourseQueryDto>> Get()
         {
             _logger.LogInformation($"{this.GetType().Name}: Get");
             var rng = new Random();
             Array values = Enum.GetValues(typeof(Enums.TeacherType));
-            return Ok(CreateCourses());
+            return Ok(CreateCourses().Select(course => course.ToQueryDto()));
 
             IEnumerable<Course> CreateCourses()
             {
@@ -54,12 +56,12 @@ namespace AspNetCoreWebApi.Controllers
         }
 
         [HttpGet("{id}")]
-        public ActionResult<Course> Get(long id)
+        public ActionResult<CourseQueryDto> Get(long id)
         {
             _logger.LogInformation($"{this.GetType().Name}: Get");
             var rng = new Random();
             Array values = Enum.GetValues(typeof(Enums.TeacherType));
-            return Ok(CreateCourse());
+            return Ok(CreateCourse().ToQueryDto());
 
             Course CreateCourse()
             {

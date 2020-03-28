@@ -9,7 +9,6 @@ namespace AspNetCoreWebApi.Models
     {
         public long CourseId { get; set; }
         public string Name { get; set; }
-        
         public long TuitionAgencyId { get; set; }
         public ICollection<Subject> Subjects { get; set; }
     }

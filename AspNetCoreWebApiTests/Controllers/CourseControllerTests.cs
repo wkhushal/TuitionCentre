@@ -1,4 +1,5 @@
 ﻿using AspNetCoreWebApi.Controllers;
+using AspNetCoreWebApi.DTOs.Query;
 using AspNetCoreWebApi.Models;
 using AutoFixture;
 using AutoFixture.AutoMoq;
@@ -52,7 +53,7 @@ namespace AspNetCoreWebApiTests.Controllers
             {
                 sut = _fixture.Create<CourseController>();
             }
-            ActionResult<IEnumerable<Course>> result;
+            ActionResult<IEnumerable<CourseQueryDto>> result;
             void Action()
             {
                 result = sut.Get();
@@ -61,7 +62,7 @@ namespace AspNetCoreWebApiTests.Controllers
             {
                 Assert.NotNull(result);
                 var okResult = Assert.IsType<OkObjectResult>(result.Result);
-                var values = Assert.IsAssignableFrom<IEnumerable<Course>>(okResult.Value);
+                var values = Assert.IsAssignableFrom<IEnumerable<CourseQueryDto>>(okResult.Value);
                 Assert.NotNull(values);
             }
         }
@@ -78,7 +79,7 @@ namespace AspNetCoreWebApiTests.Controllers
             {
                 sut = _fixture.Create<CourseController>();
             }
-            ActionResult<Course> result;
+            ActionResult<CourseQueryDto> result;
             void Action()
             {
                 result = sut.Get(courseId);
@@ -87,7 +88,7 @@ namespace AspNetCoreWebApiTests.Controllers
             {
                 Assert.NotNull(result);
                 var okResult = Assert.IsType<OkObjectResult>(result.Result);
-                var course = Assert.IsType<Course>(okResult.Value);
+                var course = Assert.IsType<CourseQueryDto>(okResult.Value);
                 Assert.Equal(courseId, course.CourseId);
             }
         }

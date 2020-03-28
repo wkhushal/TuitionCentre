@@ -122,5 +122,36 @@ namespace AspNetCoreWebApiTests.DTOs.Mapper
                 Assert.Null(student.CoursesRegistered);
             }
         }
+
+        [Fact]
+        public void CourseQueryDtoArgumentNullGuard()
+        {
+            Assert.Throws<ArgumentNullException>(() => (null as Course).ToQueryDto());
+        }
+
+        [Theory, AutoData]
+        public void CourseQueryDto(Course course)
+        {
+            Action();
+            Asserts();
+            
+            CourseQueryDto result;
+            void Action()
+            {
+                result = MapToQueryDto.ToQueryDto(course);
+            }
+            
+            void Asserts()
+            {
+                Assert.NotNull(result);
+                Assert.Equal(course.CourseId, result.CourseId);
+                Assert.Equal(course.Name, result.Name);
+                Assert.Equal(course.TuitionAgencyId, result.TuitionAgencyId);
+                Assert.Equal(course.Subjects.Select(subj => subj.SubjectId), result.Subjects.Select(dto => dto.SubjectId));
+                Assert.Equal(course.Subjects.Select(subj => subj.Name), result.Subjects.Select(dto => dto.Name));
+                Assert.Equal(course.Subjects.Select(subj => subj.CreditHours), result.Subjects.Select(dto => dto.CreditHours));
+                Assert.Equal(course.Subjects.Select(subj => subj.CourseId), result.Subjects.Select(dto => dto.CourseId));
+            }
+        }
     }
 }

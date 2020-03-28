@@ -38,6 +38,7 @@ namespace AspNetCoreWebApi.DTOs.Mapper
             {
                 StudentId = value.StudentId,
             };
+            
             if (!(value.Person is null))
             {
                 dto.Person = new PersonQueryDto
@@ -47,14 +48,27 @@ namespace AspNetCoreWebApi.DTOs.Mapper
                     BirthDate = value.Person.BirthDate
                 };
             }
+            
             if (!(value.TuitionAgency is null))
             {
                 dto.TuitionAgencyId = value.TuitionAgency?.TuitionAgencyId ?? throw new Exception("TuitionAgency member null");
             }
-            if (!(value.CoursesRegistered is null)) {
+
+            if (!(value.CoursesRegistered is null))
+            {
                 dto.CoursesRegistered = value.CoursesRegistered?.Select(course => course.CourseId).ToList();
             }
             return dto;
+        }
+
+        public static CourseQueryDto ToQueryDto(this Course value)
+        {
+            if (value is null)
+            {
+                throw new ArgumentNullException(nameof(value));
+            }
+            
+            return new CourseQueryDto(value.CourseId, value.Name, value.TuitionAgencyId, value.Subjects);
         }
     }
 }
