@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AspNetCoreWebApi.DTOs.Mapper;
+using AspNetCoreWebApi.DTOs.Query;
 using AspNetCoreWebApi.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -22,11 +24,11 @@ namespace AspNetCoreWebApi.Controllers
         }
 
         [HttpGet]
-        public ActionResult<IEnumerable<TuitionAgency>> Get()
+        public ActionResult<IEnumerable<TuitionAgencyQueryDto>> Get()
         {
             _logger.LogInformation($"{this.GetType().Name}: Get");
             var rng = new Random();
-            return Ok(CreateTuitionAgencies());
+            return Ok(CreateTuitionAgencies().Select(agency => agency.ToQueryDto()));
 
             IEnumerable<TuitionAgency> CreateTuitionAgencies()
             {

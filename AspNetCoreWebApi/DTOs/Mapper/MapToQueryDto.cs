@@ -70,5 +70,25 @@ namespace AspNetCoreWebApi.DTOs.Mapper
             
             return new CourseQueryDto(value.CourseId, value.Name, value.TuitionAgencyId, value.Subjects);
         }
+
+        public static TuitionAgencyBranchQueryDto ToQueryDto(this TuitionAgencyBranch branch)
+        {
+            if (branch is null)
+            {
+                throw new ArgumentNullException(nameof(branch));
+            }
+
+            return new TuitionAgencyBranchQueryDto(branch.TuitionAgencyBranchId, branch.TuitionAgencyId, branch.BranchName, branch.BranchAddress);
+        }
+
+        public static TuitionAgencyQueryDto ToQueryDto(this TuitionAgency agency)
+        {
+            if (agency is null)
+            {
+                throw new ArgumentNullException(nameof(agency));
+            }
+
+            return new TuitionAgencyQueryDto(agency.TuitionAgencyId, agency.Name, agency.Branches, agency.Courses);
+        }
     }
 }

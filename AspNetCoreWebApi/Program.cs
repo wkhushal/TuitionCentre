@@ -19,6 +19,8 @@ namespace AspNetCoreWebApi
             .MinimumLevel.Debug()
             .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
             .Enrich.FromLogContext()
+            .Enrich.WithProcessId()
+            .Enrich.WithAssemblyName()
             .WriteTo.Console()
             .CreateLogger();
 

@@ -1,4 +1,5 @@
 ﻿using AspNetCoreWebApi.Controllers;
+using AspNetCoreWebApi.DTOs.Query;
 using AspNetCoreWebApi.Models;
 using AutoFixture;
 using AutoFixture.AutoMoq;
@@ -50,7 +51,7 @@ namespace AspNetCoreWebApiTests.Controllers
             {
                 sut = _fixture.Create<TuitionAgencyController>();
             }
-            ActionResult<IEnumerable<TuitionAgency>> actionResult;
+            ActionResult<IEnumerable<TuitionAgencyQueryDto>> actionResult;
             void Action()
             {
                 actionResult = sut.Get();
