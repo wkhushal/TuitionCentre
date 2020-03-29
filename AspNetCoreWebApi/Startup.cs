@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AspNetCoreWebApi.Core.Interfaces;
+using AspNetCoreWebApi.Repositories;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -19,7 +21,7 @@ namespace AspNetCoreWebApi
     {
         public Startup(IConfiguration configuration)
         {
-            Configuration = configuration;
+            Configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
         }
 
         public IConfiguration Configuration { get; }
@@ -29,8 +31,10 @@ namespace AspNetCoreWebApi
         {
             services
                 .AddControllers()
-                .AddJsonOptions(options => options.JsonSerializerOptions.IgnoreNullValues = true); 
+                .AddJsonOptions(options => options.JsonSerializerOptions.IgnoreNullValues = true);
             
+            AddRepositoryServices(services);
+
             services.AddAuthentication(IISDefaults.AuthenticationScheme);
         }
 
@@ -53,13 +57,18 @@ namespace AspNetCoreWebApi
             app.UseRouting();
 
             app.UseAuthorization();
-            
+
             app.UseAuthentication();
 
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
             });
+        }
+
+        private void AddRepositoryServices(IServiceCollection services)
+        {
+            services.AddTransient(typeof(ICourseRepository), typeof(CourseRepository));
         }
     }
 }

@@ -40,39 +40,12 @@ namespace AspNetCoreWebApi.Controllers
                 _logger.LogError(ex, "Exception occurred");
                 return StatusCode(StatusCodes.Status500InternalServerError, ex);
             }
-
-            
-            IEnumerable<Course> CreateCourses()
-            {
-                var rng = new Random();
-                Array values = Enum.GetValues(typeof(Enums.TeacherType));
-                return Enumerable.Range(1, 3)
-                    .Select(index =>
-                    {
-                        var courseId = rng.Next(1, 5000);
-                        return new Course
-                        {
-                            CourseId = courseId,
-                            Name = Guid.NewGuid().ToString(),
-                            TuitionAgencyId = rng.Next(1, 5000),
-                            Subjects = Enumerable.Range(1, 3)
-                                             .Select(_ => new Subject
-                                             {
-                                                 SubjectId = rng.Next(1, 5000),
-                                                 CourseId = courseId,
-                                                 CreditHours = rng.Next(1, 5),
-                                                 Name = Guid.NewGuid().ToString(),
-                                             }).ToArray()
-                        };
-                    });
-            }
         }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<CourseQueryDto>> Get(long id)
         {
             _logger.LogInformation($"{this.GetType().Name}: Get");
-            
             try
             {
                 var course = await _courseRepository.Get(id).ConfigureAwait(false);
@@ -82,26 +55,6 @@ namespace AspNetCoreWebApi.Controllers
             {
                 _logger.LogError(ex, "Exception occurred");
                 return StatusCode(StatusCodes.Status500InternalServerError, ex);
-            }
-
-            Course CreateCourse()
-            {
-                var rng = new Random();
-                var courseId = id;
-                return new Course
-                {
-                    CourseId = courseId,
-                    Name = Guid.NewGuid().ToString(),
-                    TuitionAgencyId = rng.Next(1, 5000),
-                    Subjects = Enumerable.Range(1, 3)
-                                     .Select(_ => new Subject
-                                     {
-                                         SubjectId = rng.Next(1, 5000),
-                                         CourseId = courseId,
-                                         CreditHours = rng.Next(1, 5),
-                                         Name = Guid.NewGuid().ToString(),
-                                     }).ToArray()
-                };
             }
         }
     }

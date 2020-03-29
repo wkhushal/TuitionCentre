@@ -6,10 +6,10 @@ using System.Threading.Tasks;
 
 namespace AspNetCoreWebApi.Core.Interfaces
 {
-    public interface ICourseRepository
+    public interface ICourseRepository : IDisposable
     {
         Task<IEnumerable<Course>> List();
         Task<Course> Get(long id);
-        Task<bool> Update(Course update);
+        Task<bool> Update(long id, Course update);
     }
 }
