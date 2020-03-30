@@ -6,6 +6,7 @@ using AspNetCoreWebApi.Attributes;
 using AspNetCoreWebApi.Core.Interfaces;
 using AspNetCoreWebApi.DTOs.Mapper;
 using AspNetCoreWebApi.DTOs.Query;
+using AspNetCoreWebApi.DTOs.Upsert;
 using AspNetCoreWebApi.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -35,7 +36,7 @@ namespace AspNetCoreWebApi.Controllers
                 var courses = await _courseRepository.List().ConfigureAwait(false);
                 return Ok(courses.Select(course => course.ToQueryDto()));
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 _logger.LogError(ex, "Exception occurred");
                 return StatusCode(StatusCodes.Status500InternalServerError, ex);
@@ -51,7 +52,28 @@ namespace AspNetCoreWebApi.Controllers
                 var course = await _courseRepository.Get(id).ConfigureAwait(false);
                 return Ok(course.ToQueryDto());
             }
-            catch(Exception ex)
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Exception occurred");
+                return StatusCode(StatusCodes.Status500InternalServerError, ex);
+            }
+        }
+
+        [HttpPost("{id}")]
+        public async Task<ActionResult<CourseQueryDto>> Update(long id, [FromBody] CourseDto update)
+        {
+            _logger.LogInformation($"{this.GetType().Name}: Update");
+            try
+            {
+                if (update is null)
+                {
+                    throw new ArgumentNullException(nameof(update));
+                }
+
+                var course = await _courseRepository.Update(id, update.FromDto()).ConfigureAwait(false);
+                return Ok(course.ToQueryDto());
+            }
+            catch (Exception ex)
             {
                 _logger.LogError(ex, "Exception occurred");
                 return StatusCode(StatusCodes.Status500InternalServerError, ex);

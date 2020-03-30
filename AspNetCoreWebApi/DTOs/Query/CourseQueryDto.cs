@@ -11,18 +11,14 @@ namespace AspNetCoreWebApi.DTOs.Query
         public CourseQueryDto(long courseId, string name, long tuitionAgencyId,
             ICollection<Subject> subjects)
         {
-            if (subjects is null)
-            {
-                throw new ArgumentNullException(nameof(subjects));
-            }
-
             CourseId = courseId;
             Name = name;
             TuitionAgencyId = tuitionAgencyId;
             Subjects = subjects
-                        .Select(item => 
+                        ?.Select(item => 
                             new SubjectQueryDto(item.SubjectId, item.Name, item.CreditHours, item.CourseId))
-                        .ToList();
+                        .ToList() 
+                        ?? Enumerable.Empty<SubjectQueryDto>().ToList();
         }
 
         public long CourseId { get; set; }

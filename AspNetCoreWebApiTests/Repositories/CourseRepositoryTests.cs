@@ -50,13 +50,13 @@ namespace AspNetCoreWebApiTests.Repositories
             {
                 sut = _fixture.Create<CourseRepository>();
             }
-            
+
             Task<Course> resultTask;
             void Action()
             {
                 resultTask = sut.Get(id);
             }
-            
+
             async Task Asserts()
             {
                 var result = await resultTask.ConfigureAwait(false);
@@ -94,20 +94,30 @@ namespace AspNetCoreWebApiTests.Repositories
         }
 
         [Theory, AutoData]
-        public void Update(long id, Course update)
+        public async Task Update(long id, Course update)
         {
             Arrange();
-            Asserts();
+            Action();
+            await Asserts().ConfigureAwait(false);
 
             CourseRepository sut;
             void Arrange()
             {
                 sut = _fixture.Create<CourseRepository>();
             }
-
-            void Asserts()
+            Task<Course> result;
+            void Action()
             {
-                Assert.ThrowsAsync<NotImplementedException>(() => sut.Update(id, update));
+                result = sut.Update(id, update);
+            }
+            async Task Asserts()
+            {
+                var course = await result.ConfigureAwait(false);
+                Assert.NotNull(course);
+                Assert.Equal(update.CourseId, course.CourseId);
+                Assert.Equal(update.Name, course.Name);
+                Assert.Equal(update.TuitionAgencyId, course.TuitionAgencyId);
+                Assert.Equal(update.Subjects.Count, course.Subjects.Count);
             }
         }
 

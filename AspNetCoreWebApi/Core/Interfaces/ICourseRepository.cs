@@ -10,6 +10,6 @@ namespace AspNetCoreWebApi.Core.Interfaces
     {
         Task<IEnumerable<Course>> List();
         Task<Course> Get(long id);
-        Task<bool> Update(long id, Course update);
+        Task<Course> Update(long id, Course update);
     }
 }

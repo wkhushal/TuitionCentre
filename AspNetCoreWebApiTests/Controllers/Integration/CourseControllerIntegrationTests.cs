@@ -17,33 +17,16 @@ using System.Text;
 using System.Threading.Tasks;
 using Xunit;
 
-namespace AspNetCoreWebApiTests.Controllers
+namespace AspNetCoreWebApiTests.Controllers.Integration
 {
-    public class CourseControllerTests
+    public class CourseControllerIntegrationTests
     {
         IFixture _fixture;
-        public CourseControllerTests()
+        public CourseControllerIntegrationTests()
         {
             _fixture = new Fixture();
             _fixture.Customize(new AutoMoqCustomization());
             _fixture.Customize<BindingInfo>(c => c.OmitAutoProperties());
-        }
-
-        [Fact]
-        public void CtorArgumentNullGuardTests()
-        {
-            Arrange();
-            Asserts();
-
-            GuardClauseAssertion assertions;
-            void Arrange()
-            {
-                assertions = new GuardClauseAssertion(_fixture);
-            }
-            void Asserts()
-            {
-                assertions.Verify(typeof(CourseController).GetConstructors());
-            }
         }
 
         [Fact]
@@ -58,8 +41,7 @@ namespace AspNetCoreWebApiTests.Controllers
             void Arrange()
             {
                 mockedRepository = _fixture.Freeze<Mock<ICourseRepository>>();
-                mockedRepository.Setup(fake => fake.List())
-                                .Returns(Task.FromResult(_fixture.CreateMany<Course>()));
+                mockedRepository.Setup(fake => fake.List());
 
                 sut = _fixture.Create<CourseController>();
             }
@@ -72,11 +54,7 @@ namespace AspNetCoreWebApiTests.Controllers
             {
                 var result = await resultTask;
                 Assert.NotNull(result);
-                var okResult = Assert.IsType<OkObjectResult>(result.Result);
-                var values = Assert.IsAssignableFrom<IEnumerable<CourseQueryDto>>(okResult.Value);
-                Assert.NotNull(values);
-                Assert.NotEmpty(values.ToList());
-                mockedRepository.VerifyAll();
+                mockedRepository.Verify(fake => fake.List(), Times.Once);
             }
         }
 
@@ -92,8 +70,7 @@ namespace AspNetCoreWebApiTests.Controllers
             void Arrange()
             {
                 mockedRepository = _fixture.Freeze<Mock<ICourseRepository>>();
-                mockedRepository.Setup(fake => fake.Get(It.IsAny<long>()))
-                                .Returns(Task.FromResult(_fixture.Build<Course>().With(course => course.CourseId, courseId).Create()));
+                mockedRepository.Setup(fake => fake.Get(It.IsAny<long>()));
                 sut = _fixture.Create<CourseController>();
             }
             Task<ActionResult<CourseQueryDto>> resultTask;
@@ -105,10 +82,7 @@ namespace AspNetCoreWebApiTests.Controllers
             {
                 var result = await resultTask.ConfigureAwait(false);
                 Assert.NotNull(result);
-                var okResult = Assert.IsType<OkObjectResult>(result.Result);
-                var course = Assert.IsType<CourseQueryDto>(okResult.Value);
-                Assert.Equal(courseId, course.CourseId);
-                mockedRepository.VerifyAll();
+                mockedRepository.Verify(fake => fake.Get(It.IsAny<long>()), Times.Once);
             }
         }
 
@@ -124,30 +98,19 @@ namespace AspNetCoreWebApiTests.Controllers
             void Arrange()
             {
                 mockedRepository = _fixture.Freeze<Mock<ICourseRepository>>();
-                mockedRepository.Setup(fake => fake.Update(It.IsAny<long>(), It.IsAny<Course>()))
-                                .Returns(Task.FromResult(_fixture.Build<Course>()
-                                                                .With(course => course.CourseId, courseId)
-                                                                .With(course => course.Name, update.Name)
-                                                                .With(course => course.TuitionAgencyId, update.TuitionAgencyId)
-                                                                .Create()));
+                mockedRepository.Setup(fake => fake.Update(It.IsAny<long>(), It.IsAny<Course>()));
                 sut = _fixture.Create<CourseController>();
-
             }
             Task<ActionResult<CourseQueryDto>> resultTask;
             void Action()
             {
                 resultTask = sut.Update(courseId, update);
             }
-            async Task Asserts() 
+            async Task Asserts()
             {
                 var result = await resultTask.ConfigureAwait(false);
                 Assert.NotNull(result);
-                var okResult = Assert.IsType<OkObjectResult>(result.Result);
-                var course = Assert.IsType<CourseQueryDto>(okResult.Value);
-                Assert.Equal(courseId, course.CourseId);
-                Assert.Equal(update.Name, course.Name);
-                Assert.Equal(update.TuitionAgencyId, course.TuitionAgencyId);
-                mockedRepository.VerifyAll();
+                mockedRepository.Verify(fake => fake.Update(It.IsAny<long>(), It.IsAny<Course>()), Times.Once);
             }
         }
     }

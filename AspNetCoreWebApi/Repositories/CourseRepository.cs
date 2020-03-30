@@ -77,14 +77,14 @@ namespace AspNetCoreWebApi.Repositories
             }
         }
 
-        public Task<bool> Update(long id, Course update)
+        public Task<Course> Update(long id, Course update)
         {
             if (update is null)
             {
                 throw new ArgumentNullException(nameof(update));
             }
-            _logger.LogError("NotImplemented");
-            throw new NotImplementedException();
+
+            return Task.FromResult(update);
         }
     }
 }
