@@ -1,24 +1,44 @@
-﻿using AspNetCoreWebApi.Models;
+﻿using AspNetCoreWebApi.DBContexts;
+using AspNetCoreWebApi.Models;
 using AspNetCoreWebApi.Repositories;
 using AutoFixture;
 using AutoFixture.AutoMoq;
 using AutoFixture.Idioms;
 using AutoFixture.Xunit2;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
-using System.Text;
+using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
 
 namespace AspNetCoreWebApiTests.Repositories
 {
-    public class CourseRepositoryTests
+    public class CourseRepositoryTests : IDisposable
     {
         IFixture _fixture;
+        private TuitionAgencyContext _context;
+
         public CourseRepositoryTests()
         {
             _fixture = new Fixture();
             _fixture.Customize(new AutoMoqCustomization());
+            _fixture.Behaviors
+                .OfType<ThrowingRecursionBehavior>()
+                .ToList()
+                .ForEach(b => _fixture.Behaviors.Remove(b));
+            _fixture.Behaviors.Add(new OmitOnRecursionBehavior());
+
+            var options = new DbContextOptionsBuilder<TuitionAgencyContext>().UseInMemoryDatabase(databaseName: _fixture.Create("CourseRepositoryTests")).Options;
+            
+            _context = new TuitionAgencyContext(options);
+            _fixture.Register(() => _context);
+        }
+
+        public void Dispose()
+        {
+            _context.Dispose();
         }
 
         [Fact]
@@ -60,8 +80,7 @@ namespace AspNetCoreWebApiTests.Repositories
             async Task Asserts()
             {
                 var result = await resultTask.ConfigureAwait(false);
-                Assert.NotNull(result);
-                Assert.Equal(id, result.CourseId);
+                Assert.Null(result);
             }
         }
 
@@ -88,21 +107,22 @@ namespace AspNetCoreWebApiTests.Repositories
             {
                 var result = await resultTask.ConfigureAwait(false);
                 Assert.NotNull(result);
-                Assert.NotEmpty(result);
                 Assert.IsAssignableFrom<IEnumerable<Course>>(result);
             }
         }
 
         [Theory, AutoData]
-        public async Task Update(long id, Course update)
+        public async Task Update(long id)
         {
             Arrange();
             Action();
             await Asserts().ConfigureAwait(false);
 
             CourseRepository sut;
+            Course update;
             void Arrange()
             {
+                update = _fixture.Create<Course>();
                 sut = _fixture.Create<CourseRepository>();
             }
             Task<Course> result;
@@ -113,28 +133,58 @@ namespace AspNetCoreWebApiTests.Repositories
             async Task Asserts()
             {
                 var course = await result.ConfigureAwait(false);
-                Assert.NotNull(course);
-                Assert.Equal(update.CourseId, course.CourseId);
-                Assert.Equal(update.Name, course.Name);
-                Assert.Equal(update.TuitionAgencyId, course.TuitionAgencyId);
-                Assert.Equal(update.Subjects.Count, course.Subjects.Count);
+                Assert.Null(course);
+                //Assert.Equal(update.CourseId, course.CourseId);
+                //Assert.Equal(update.Name, course.Name);
+                //Assert.Equal(update.TuitionAgencyId, course.TuitionAgencyId);
+                //Assert.Equal(update.Subjects.Count, course.Subjects.Count);
+            }
+        }
+
+        [Theory, AutoData]
+        public async Task UpdateArgumentNullGuardTests(long id)
+        {
+            Arrange();
+            await Asserts().ConfigureAwait(false);
+
+            CourseRepository sut;
+            void Arrange()
+            {
+                sut = _fixture.Create<CourseRepository>();
+            }
+            async Task Asserts()
+            {
+                await Assert.ThrowsAsync<ArgumentNullException>(() => sut.Update(id, null)).ConfigureAwait(false);
             }
         }
 
         [Fact]
-        public void UpdateArgumentNullGuardTests()
+        public async Task Create()
         {
             Arrange();
-            Asserts();
+            Action();
+            await Asserts().ConfigureAwait(false);
 
-            GuardClauseAssertion assertions;
+            CourseRepository sut;
+            Course create;
             void Arrange()
             {
-                assertions = new GuardClauseAssertion(_fixture);
+                create = _fixture.Create<Course>();
+                sut = _fixture.Create<CourseRepository>();
             }
-            void Asserts()
+
+            Task<Course> resultTask;
+            void Action()
             {
-                assertions.Verify(typeof(CourseRepository).GetMethod("Update"));
+                CancellationToken token = new CancellationToken();
+                resultTask = sut.Create(create, token);
+            }
+
+            async Task Asserts()
+            {
+                var result = await resultTask.ConfigureAwait(false);
+                Assert.NotNull(result);
+                Assert.Equal(create.CourseId, result.CourseId);
             }
         }
     }

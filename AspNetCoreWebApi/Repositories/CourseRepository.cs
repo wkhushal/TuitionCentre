@@ -1,90 +1,102 @@
 ﻿using AspNetCoreWebApi.Core.Interfaces;
+using AspNetCoreWebApi.DBContexts;
 using AspNetCoreWebApi.Models;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace AspNetCoreWebApi.Repositories
 {
     public class CourseRepository : ICourseRepository
     {
+        private readonly TuitionAgencyContext _context;
         private readonly ILogger<CourseRepository> _logger;
-        public CourseRepository(ILogger<CourseRepository> logger)
+        public CourseRepository(TuitionAgencyContext context, ILogger<CourseRepository> logger)
         {
+            _context = context ?? throw new ArgumentNullException(nameof(context));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         public void Dispose()
         {
+            _context?.Dispose();
         }
 
-        public Task<Course> Get(long id)
+        public async Task<Course> Get(long id, CancellationToken token = default)
         {
             _logger.LogInformation("Get {Id}", id);
-            return Task.FromResult(CreateCourse());
-
-            Course CreateCourse()
-            {
-                var rng = new Random();
-                var courseId = id;
-                return new Course
-                {
-                    CourseId = courseId,
-                    Name = Guid.NewGuid().ToString(),
-                    TuitionAgencyId = rng.Next(1, 5000),
-                    Subjects = Enumerable.Range(1, 3)
-                                     .Select(_ => new Subject
-                                     {
-                                         SubjectId = rng.Next(1, 5000),
-                                         CourseId = courseId,
-                                         CreditHours = rng.Next(1, 5),
-                                         Name = Guid.NewGuid().ToString(),
-                                     }).ToArray()
-                };
-            }
+            return await _context.Courses.FindAsync(new object[] { id }, token).ConfigureAwait(false);
         }
 
-        public Task<IEnumerable<Course>> List()
+        public async Task<IEnumerable<Course>> List(CancellationToken token = default)
         {
             _logger.LogInformation("List");
-            return Task.FromResult(CreateCourses());
-
-            IEnumerable<Course> CreateCourses()
+            try
             {
-                var rng = new Random();
-                Array values = Enum.GetValues(typeof(Enums.TeacherType));
-                return Enumerable.Range(1, 3)
-                    .Select(index =>
-                    {
-                        var courseId = rng.Next(1, 5000);
-                        return new Course
-                        {
-                            CourseId = courseId,
-                            Name = Guid.NewGuid().ToString(),
-                            TuitionAgencyId = rng.Next(1, 5000),
-                            Subjects = Enumerable.Range(1, 3)
-                                             .Select(_ => new Subject
-                                             {
-                                                 SubjectId = rng.Next(1, 5000),
-                                                 CourseId = courseId,
-                                                 CreditHours = rng.Next(1, 5),
-                                                 Name = Guid.NewGuid().ToString(),
-                                             }).ToArray()
-                        };
-                    });
+                var result = await _context
+                                    .Courses
+                                    .ToListAsync(token)
+                                    .ConfigureAwait(false);
+                return result;
+            }
+            catch (DbUpdateConcurrencyException ex)
+            {
+                _logger.LogError("Course List {@Exception}", ex);
+                return default;
             }
         }
 
-        public Task<Course> Update(long id, Course update)
+        public async Task<Course> Update(long id, Course update, CancellationToken token = default)
         {
             if (update is null)
             {
                 throw new ArgumentNullException(nameof(update));
             }
 
-            return Task.FromResult(update);
+            var existingCourse = await _context.Courses.FindAsync(new object[] { id }, token).ConfigureAwait(false);
+
+            if (existingCourse is null)
+            {
+                _logger.LogInformation("course doesnt exist {Id} update {@Course}", id, update);
+                return default;
+            }
+
+            existingCourse.Name = update.Name;
+            existingCourse.Subjects = update.Subjects;
+            existingCourse.TuitionAgencyId = update.TuitionAgencyId;
+            try
+            {
+                await _context.SaveChangesAsync();
+                return existingCourse;
+            }
+            catch (DbUpdateConcurrencyException ex)
+            {
+                _logger.LogError("Course Update {@Exception}", ex);
+                return default;
+            }
+        }
+
+        public async Task<Course> Create(Course create, CancellationToken token = default)
+        {
+            if (create is null)
+            {
+                throw new ArgumentNullException(nameof(create));
+            }
+
+            // if it already exists?
+            var existingCourse = await _context.Courses.FindAsync(new object[] { create.CourseId }, token).ConfigureAwait(false);
+
+            if (!(existingCourse is null))
+            {
+                _logger.LogInformation("course already exists {@Course}", create);
+                return default;
+            }
+
+            var created = await _context.Courses.AddAsync(create, token).ConfigureAwait(false);
+            return created.Entity;
         }
     }
 }

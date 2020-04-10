@@ -2,26 +2,39 @@
 using AspNetCoreWebApi.DTOs.Query;
 using AspNetCoreWebApi.Models;
 using AutoFixture;
-using AutoFixture.Xunit2;
+using AutoFixture.AutoMoq;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using Xunit;
 
 namespace AspNetCoreWebApiTests.DTOs.Mapper
 {
     public class MapToQueryDtoTests
     {
-        [Theory, AutoData]
-        public void SubjectQueryDto(Subject subject)
+        IFixture _fixture;
+
+        public MapToQueryDtoTests()
+        {
+            _fixture = new Fixture();
+            _fixture.Customize(new AutoMoqCustomization());
+            _fixture.Behaviors
+                .OfType<ThrowingRecursionBehavior>()
+                .ToList()
+                .ForEach(b => _fixture.Behaviors.Remove(b));
+            _fixture.Behaviors.Add(new OmitOnRecursionBehavior());
+        }
+
+        [Fact]
+        public void SubjectQueryDto()
         {
             Action();
             Asserts();
 
             SubjectQueryDto result;
+            Subject subject;
             void Action()
             {
+                subject = _fixture.Create<Subject>();
                 result = MapToQueryDto.ToQueryDto(subject);
             }
             void Asserts()
@@ -40,15 +53,17 @@ namespace AspNetCoreWebApiTests.DTOs.Mapper
             Assert.Throws<ArgumentNullException>(() => (null as Subject).ToQueryDto());
         }
 
-        [Theory, AutoData]
-        public void TeacherQueryDto(Teacher teacher)
+        [Fact]
+        public void TeacherQueryDto()
         {
             Action();
             Asserts();
-            
+
+            Teacher teacher;
             TeacherQueryDto result;
             void Action()
             {
+                teacher = _fixture.Create<Teacher>();
                 result = MapToQueryDto.ToQueryDto(teacher);
             }
             
@@ -67,15 +82,17 @@ namespace AspNetCoreWebApiTests.DTOs.Mapper
             Assert.Throws<ArgumentNullException>(() => (null as Teacher).ToQueryDto());
         }
 
-        [Theory, AutoData]
-        public void StudentQueryDto(Student student)
+        [Fact]
+        public void StudentQueryDto()
         {
             Action();
             Asserts();
             
+            Student student;
             StudentQueryDto result;
             void Action()
             {
+                student = _fixture.Create<Student>();
                 result = MapToQueryDto.ToQueryDto(student);
             }
             void Asserts()
@@ -94,8 +111,8 @@ namespace AspNetCoreWebApiTests.DTOs.Mapper
             Assert.Throws<ArgumentNullException>(() => (null as Student).ToQueryDto());
         }
 
-        [Theory, AutoData]
-        public void StudentQueryDtoSparseMembers(IFixture fixture)
+        [Fact]
+        public void StudentQueryDtoSparseMembers()
         {
             Arrange();
             Action();
@@ -106,7 +123,7 @@ namespace AspNetCoreWebApiTests.DTOs.Mapper
             {
                 student = new Student
                 {
-                    StudentId = fixture.Create<long>()
+                    StudentId = _fixture.Create<long>()
                 };
             }
             StudentQueryDto result;
@@ -129,15 +146,17 @@ namespace AspNetCoreWebApiTests.DTOs.Mapper
             Assert.Throws<ArgumentNullException>(() => (null as Course).ToQueryDto());
         }
 
-        [Theory, AutoData]
-        public void CourseQueryDto(Course course)
+        [Fact]
+        public void CourseQueryDto()
         {
             Action();
             Asserts();
-            
+
+            Course course;
             CourseQueryDto result;
             void Action()
             {
+                course = _fixture.Create<Course>();
                 result = MapToQueryDto.ToQueryDto(course);
             }
             

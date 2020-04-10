@@ -1,14 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
-using AspNetCoreWebApi.Attributes;
 using AspNetCoreWebApi.Core.Interfaces;
 using AspNetCoreWebApi.DTOs.Mapper;
 using AspNetCoreWebApi.DTOs.Query;
 using AspNetCoreWebApi.DTOs.Upsert;
-using AspNetCoreWebApi.Models;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -33,7 +31,8 @@ namespace AspNetCoreWebApi.Controllers
             _logger.LogInformation($"{this.GetType().Name}: Get");
             try
             {
-                var courses = await _courseRepository.List().ConfigureAwait(false);
+                CancellationToken cts = new CancellationToken();
+                var courses = await _courseRepository.List(cts).ConfigureAwait(false);
                 return Ok(courses.Select(course => course.ToQueryDto()));
             }
             catch (Exception ex)
@@ -49,7 +48,12 @@ namespace AspNetCoreWebApi.Controllers
             _logger.LogInformation($"{this.GetType().Name}: Get");
             try
             {
-                var course = await _courseRepository.Get(id).ConfigureAwait(false);
+                CancellationToken cts = new CancellationToken();
+                var course = await _courseRepository.Get(id, cts).ConfigureAwait(false);
+                if(course is null)
+                {
+                    return NoContent();
+                }
                 return Ok(course.ToQueryDto());
             }
             catch (Exception ex)
@@ -69,9 +73,18 @@ namespace AspNetCoreWebApi.Controllers
                 {
                     throw new ArgumentNullException(nameof(update));
                 }
+                CancellationToken cts = new CancellationToken();
+                var course = await _courseRepository.Update(id, update.FromDto(), cts).ConfigureAwait(false);
+                if(course is null)
+                {
+                    return NoContent();
+                }
 
-                var course = await _courseRepository.Update(id, update.FromDto()).ConfigureAwait(false);
-                return Ok(course.ToQueryDto());
+                return new AcceptedAtActionResult(
+                    "Update", 
+                    nameof(CourseController),
+                    new { Id = update.CourseId},
+                    course.ToQueryDto());
             }
             catch (Exception ex)
             {

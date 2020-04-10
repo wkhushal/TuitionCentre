@@ -8,8 +8,8 @@ namespace AspNetCoreWebApi.Models
     public class Student
     {
         public long StudentId { get; set; }
-        public Person Person { get; set; }
-        public TuitionAgency TuitionAgency { get; set; }
-        public ICollection<Course> CoursesRegistered { get; set; }
+        public virtual Person Person { get; set; }
+        public virtual TuitionAgency TuitionAgency { get; set; }
+        public virtual ICollection<Course> CoursesRegistered { get; set; }
     }
 }

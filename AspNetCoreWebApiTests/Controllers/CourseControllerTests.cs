@@ -10,10 +10,9 @@ using AutoFixture.Xunit2;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Moq;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -27,6 +26,11 @@ namespace AspNetCoreWebApiTests.Controllers
             _fixture = new Fixture();
             _fixture.Customize(new AutoMoqCustomization());
             _fixture.Customize<BindingInfo>(c => c.OmitAutoProperties());
+            _fixture.Behaviors
+                .OfType<ThrowingRecursionBehavior>()
+                .ToList()
+                .ForEach(b => _fixture.Behaviors.Remove(b));
+            _fixture.Behaviors.Add(new OmitOnRecursionBehavior());
         }
 
         [Fact]
@@ -58,7 +62,7 @@ namespace AspNetCoreWebApiTests.Controllers
             void Arrange()
             {
                 mockedRepository = _fixture.Freeze<Mock<ICourseRepository>>();
-                mockedRepository.Setup(fake => fake.List())
+                mockedRepository.Setup(fake => fake.List(It.IsAny<CancellationToken>()))
                                 .Returns(Task.FromResult(_fixture.CreateMany<Course>()));
 
                 sut = _fixture.Create<CourseController>();
@@ -92,7 +96,7 @@ namespace AspNetCoreWebApiTests.Controllers
             void Arrange()
             {
                 mockedRepository = _fixture.Freeze<Mock<ICourseRepository>>();
-                mockedRepository.Setup(fake => fake.Get(It.IsAny<long>()))
+                mockedRepository.Setup(fake => fake.Get(It.IsAny<long>(), It.IsAny<CancellationToken>()))
                                 .Returns(Task.FromResult(_fixture.Build<Course>().With(course => course.CourseId, courseId).Create()));
                 sut = _fixture.Create<CourseController>();
             }
@@ -124,7 +128,7 @@ namespace AspNetCoreWebApiTests.Controllers
             void Arrange()
             {
                 mockedRepository = _fixture.Freeze<Mock<ICourseRepository>>();
-                mockedRepository.Setup(fake => fake.Update(It.IsAny<long>(), It.IsAny<Course>()))
+                mockedRepository.Setup(fake => fake.Update(It.IsAny<long>(), It.IsAny<Course>(), It.IsAny<CancellationToken>()))
                                 .Returns(Task.FromResult(_fixture.Build<Course>()
                                                                 .With(course => course.CourseId, courseId)
                                                                 .With(course => course.Name, update.Name)
@@ -142,7 +146,7 @@ namespace AspNetCoreWebApiTests.Controllers
             {
                 var result = await resultTask.ConfigureAwait(false);
                 Assert.NotNull(result);
-                var okResult = Assert.IsType<OkObjectResult>(result.Result);
+                var okResult = Assert.IsType<AcceptedAtActionResult>(result.Result);
                 var course = Assert.IsType<CourseQueryDto>(okResult.Value);
                 Assert.Equal(courseId, course.CourseId);
                 Assert.Equal(update.Name, course.Name);

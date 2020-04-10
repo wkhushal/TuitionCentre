@@ -5,15 +5,12 @@ using AspNetCoreWebApi.DTOs.Upsert;
 using AspNetCoreWebApi.Models;
 using AutoFixture;
 using AutoFixture.AutoMoq;
-using AutoFixture.Idioms;
 using AutoFixture.Xunit2;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Moq;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -41,7 +38,7 @@ namespace AspNetCoreWebApiTests.Controllers.Integration
             void Arrange()
             {
                 mockedRepository = _fixture.Freeze<Mock<ICourseRepository>>();
-                mockedRepository.Setup(fake => fake.List());
+                mockedRepository.Setup(fake => fake.List(It.IsAny<CancellationToken>()));
 
                 sut = _fixture.Create<CourseController>();
             }
@@ -54,7 +51,7 @@ namespace AspNetCoreWebApiTests.Controllers.Integration
             {
                 var result = await resultTask;
                 Assert.NotNull(result);
-                mockedRepository.Verify(fake => fake.List(), Times.Once);
+                mockedRepository.Verify(fake => fake.List(It.IsAny<CancellationToken>()), Times.Once);
             }
         }
 
@@ -70,7 +67,7 @@ namespace AspNetCoreWebApiTests.Controllers.Integration
             void Arrange()
             {
                 mockedRepository = _fixture.Freeze<Mock<ICourseRepository>>();
-                mockedRepository.Setup(fake => fake.Get(It.IsAny<long>()));
+                mockedRepository.Setup(fake => fake.Get(It.IsAny<long>(), It.IsAny<CancellationToken>()));
                 sut = _fixture.Create<CourseController>();
             }
             Task<ActionResult<CourseQueryDto>> resultTask;
@@ -82,7 +79,7 @@ namespace AspNetCoreWebApiTests.Controllers.Integration
             {
                 var result = await resultTask.ConfigureAwait(false);
                 Assert.NotNull(result);
-                mockedRepository.Verify(fake => fake.Get(It.IsAny<long>()), Times.Once);
+                mockedRepository.Verify(fake => fake.Get(It.IsAny<long>(), It.IsAny<CancellationToken>()), Times.Once);
             }
         }
 
@@ -98,7 +95,7 @@ namespace AspNetCoreWebApiTests.Controllers.Integration
             void Arrange()
             {
                 mockedRepository = _fixture.Freeze<Mock<ICourseRepository>>();
-                mockedRepository.Setup(fake => fake.Update(It.IsAny<long>(), It.IsAny<Course>()));
+                mockedRepository.Setup(fake => fake.Update(It.IsAny<long>(), It.IsAny<Course>(), It.IsAny<CancellationToken>()));
                 sut = _fixture.Create<CourseController>();
             }
             Task<ActionResult<CourseQueryDto>> resultTask;
@@ -110,7 +107,7 @@ namespace AspNetCoreWebApiTests.Controllers.Integration
             {
                 var result = await resultTask.ConfigureAwait(false);
                 Assert.NotNull(result);
-                mockedRepository.Verify(fake => fake.Update(It.IsAny<long>(), It.IsAny<Course>()), Times.Once);
+                mockedRepository.Verify(fake => fake.Update(It.IsAny<long>(), It.IsAny<Course>(), It.IsAny<CancellationToken>()), Times.Once);
             }
         }
     }

@@ -9,7 +9,7 @@ namespace AspNetCoreWebApi.Models
     {
         public long TuitionAgencyId { get; set; }
         public string Name { get; set; }
-        public ICollection<TuitionAgencyBranch> Branches { get; set; }
-        public ICollection<Course> Courses { get; set; }
+        public virtual ICollection<TuitionAgencyBranch> Branches { get; set; }
+        public virtual ICollection<Course> Courses { get; set; }
     }
 }
