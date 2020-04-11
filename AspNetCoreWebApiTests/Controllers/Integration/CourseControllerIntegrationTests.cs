@@ -34,10 +34,10 @@ namespace AspNetCoreWebApiTests.Controllers.Integration
             await Asserts().ConfigureAwait(false);
 
             CourseController sut;
-            Mock<ICourseRepository> mockedRepository;
+            Mock<IRepository<Course>> mockedRepository;
             void Arrange()
             {
-                mockedRepository = _fixture.Freeze<Mock<ICourseRepository>>();
+                mockedRepository = _fixture.Freeze<Mock<IRepository<Course>>>();
                 mockedRepository.Setup(fake => fake.List(It.IsAny<CancellationToken>()));
 
                 sut = _fixture.Create<CourseController>();
@@ -63,17 +63,17 @@ namespace AspNetCoreWebApiTests.Controllers.Integration
             await Asserts().ConfigureAwait(false);
 
             CourseController sut;
-            Mock<ICourseRepository> mockedRepository;
+            Mock<IRepository<Course>> mockedRepository;
             void Arrange()
             {
-                mockedRepository = _fixture.Freeze<Mock<ICourseRepository>>();
+                mockedRepository = _fixture.Freeze<Mock<IRepository<Course>>>();
                 mockedRepository.Setup(fake => fake.Get(It.IsAny<long>(), It.IsAny<CancellationToken>()));
                 sut = _fixture.Create<CourseController>();
             }
             Task<ActionResult<CourseQueryDto>> resultTask;
             void Action()
             {
-                resultTask = sut.Get(courseId);
+                resultTask = sut.GetById(courseId);
             }
             async Task Asserts()
             {
@@ -91,10 +91,10 @@ namespace AspNetCoreWebApiTests.Controllers.Integration
             await Asserts().ConfigureAwait(false);
 
             CourseController sut;
-            Mock<ICourseRepository> mockedRepository;
+            Mock<IRepository<Course>> mockedRepository;
             void Arrange()
             {
-                mockedRepository = _fixture.Freeze<Mock<ICourseRepository>>();
+                mockedRepository = _fixture.Freeze<Mock<IRepository<Course>>>();
                 mockedRepository.Setup(fake => fake.Update(It.IsAny<long>(), It.IsAny<Course>(), It.IsAny<CancellationToken>()));
                 sut = _fixture.Create<CourseController>();
             }
@@ -108,6 +108,34 @@ namespace AspNetCoreWebApiTests.Controllers.Integration
                 var result = await resultTask.ConfigureAwait(false);
                 Assert.NotNull(result);
                 mockedRepository.Verify(fake => fake.Update(It.IsAny<long>(), It.IsAny<Course>(), It.IsAny<CancellationToken>()), Times.Once);
+            }
+        }
+
+        [Theory, AutoData]
+        public async Task Create(CourseDto create)
+        {
+            Arrange();
+            Action();
+            await Asserts().ConfigureAwait(false);
+
+            CourseController sut;
+            Mock<IRepository<Course>> mockedRepository;
+            void Arrange()
+            {
+                mockedRepository = _fixture.Freeze<Mock<IRepository<Course>>>();
+                mockedRepository.Setup(fake => fake.Create(It.IsAny<Course>(), It.IsAny<CancellationToken>()));
+                sut = _fixture.Create<CourseController>();
+            }
+            Task<ActionResult<CourseQueryDto>> resultTask;
+            void Action()
+            {
+                resultTask = sut.Create(create);
+            }
+            async Task Asserts()
+            {
+                var result = await resultTask.ConfigureAwait(false);
+                Assert.NotNull(result);
+                mockedRepository.Verify(fake => fake.Create(It.IsAny<Course>(), It.IsAny<CancellationToken>()), Times.Once);
             }
         }
     }

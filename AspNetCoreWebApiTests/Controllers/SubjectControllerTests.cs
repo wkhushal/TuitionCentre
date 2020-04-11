@@ -67,7 +67,7 @@ namespace AspNetCoreWebApiTests.Controllers
         }
 
         [Theory, AutoData]
-        public void Get(long subjectId)
+        public void GetById(long subjectId)
         {
             Arrange();
             Action();
@@ -81,7 +81,7 @@ namespace AspNetCoreWebApiTests.Controllers
             ActionResult<SubjectQueryDto> result;
             void Action()
             {
-                result = sut.Get(subjectId);
+                result = sut.GetById(subjectId);
             }
             void Asserts()
             {

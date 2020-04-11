@@ -6,11 +6,12 @@ using System.Threading.Tasks;
 
 namespace AspNetCoreWebApi.Core.Interfaces
 {
-    public interface ICourseRepository : IDisposable
+    public interface IRepository<T> : IDisposable
+        where T : class, new()
     {
-        Task<IEnumerable<Course>> List(CancellationToken token = default);
-        Task<Course> Get(long id, CancellationToken token = default);
-        Task<Course> Update(long id, Course update, CancellationToken token = default);
-        Task<Course> Create(Course create, CancellationToken token = default);
+        Task<IEnumerable<T>> List(CancellationToken token = default);
+        Task<T> Get(long id, CancellationToken token = default);
+        Task<T> Update(long id, T update, CancellationToken token = default);
+        Task<T> Create(T create, CancellationToken token = default);
     }
 }

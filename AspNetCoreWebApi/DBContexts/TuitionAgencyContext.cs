@@ -19,9 +19,22 @@ namespace AspNetCoreWebApi.DBContexts
             //Write Fluent API configurations here
 
             //Property Configurations
-            var courseEntity = modelBuilder.Entity<Course>();
-            courseEntity.Property(course => course.CourseId).HasColumnName("Id").HasDefaultValue(0).IsRequired();
-            courseEntity.HasOne(course => course.TuitionAgency).WithMany(agency => agency.Courses).HasForeignKey(course => course.TuitionAgencyId);
+            SetupSubjectEntity();
+            SetupCourseEntity();
+
+            void SetupSubjectEntity()
+            {
+                var subjectEntity = modelBuilder.Entity<Subject>();
+                subjectEntity.Property(subject => subject.SubjectId).HasColumnName("Id").HasDefaultValue(0).IsRequired();
+                subjectEntity.HasOne(subject => subject.Course).WithMany(course => course.Subjects).HasForeignKey(subject => subject.CourseId);
+            }
+
+            void SetupCourseEntity()
+            {
+                var courseEntity = modelBuilder.Entity<Course>();
+                courseEntity.Property(course => course.CourseId).HasColumnName("Id").HasDefaultValue(0).IsRequired();
+                courseEntity.HasOne(course => course.TuitionAgency).WithMany(agency => agency.Courses).HasForeignKey(course => course.TuitionAgencyId);
+            }
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

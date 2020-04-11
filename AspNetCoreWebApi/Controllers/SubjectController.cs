@@ -41,7 +41,7 @@ namespace AspNetCoreWebApi.Controllers
         }
 
         [HttpGet("{id}")]
-        public ActionResult<SubjectQueryDto> Get(long id)
+        public ActionResult<SubjectQueryDto> GetById(long id)
         {
             _logger.LogInformation($"{this.GetType().Name}: Get");
             var rng = new Random();

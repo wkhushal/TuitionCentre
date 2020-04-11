@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace AspNetCoreWebApi.Repositories
 {
-    public class CourseRepository : ICourseRepository
+    public class CourseRepository : IRepository<Course>
     {
         private readonly TuitionAgencyContext _context;
         private readonly ILogger<CourseRepository> _logger;
@@ -69,7 +69,11 @@ namespace AspNetCoreWebApi.Repositories
             existingCourse.TuitionAgencyId = update.TuitionAgencyId;
             try
             {
-                await _context.SaveChangesAsync();
+                var count = await _context.SaveChangesAsync(token).ConfigureAwait(false);
+                if(count <= 0)
+                {
+                    return default;
+                }
                 return existingCourse;
             }
             catch (DbUpdateConcurrencyException ex)
@@ -95,8 +99,21 @@ namespace AspNetCoreWebApi.Repositories
                 return default;
             }
 
-            var created = await _context.Courses.AddAsync(create, token).ConfigureAwait(false);
-            return created.Entity;
+            try
+            {
+                var created = await _context.Courses.AddAsync(create, token).ConfigureAwait(false);
+                var count = await _context.SaveChangesAsync(token).ConfigureAwait(false);
+                if(count <= 0)
+                {
+                    return default;
+                }
+                return created.Entity;
+            }
+            catch (DbUpdateConcurrencyException ex)
+            {
+                _logger.LogError("Course Update {@Exception}", ex);
+                return default;
+            }
         }
     }
 }

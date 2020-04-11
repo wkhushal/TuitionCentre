@@ -1,9 +1,11 @@
 using System;
 using AspNetCoreWebApi.Core.Interfaces;
 using AspNetCoreWebApi.DBContexts;
+using AspNetCoreWebApi.Models;
 using AspNetCoreWebApi.Repositories;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Server.IISIntegration;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -11,6 +13,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Serilog;
 
+[assembly: ApiConventionType(typeof(DefaultApiConventions))]
 namespace AspNetCoreWebApi
 {
     public class Startup
@@ -63,7 +66,7 @@ namespace AspNetCoreWebApi
 
         private void AddRepositoryServices(IServiceCollection services)
         {
-            services.AddTransient(typeof(ICourseRepository), typeof(CourseRepository));
+            services.AddTransient(typeof(IRepository<Course>), typeof(CourseRepository));
         }
     }
 }

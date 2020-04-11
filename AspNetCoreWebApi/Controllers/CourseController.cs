@@ -7,6 +7,7 @@ using AspNetCoreWebApi.Core.Interfaces;
 using AspNetCoreWebApi.DTOs.Mapper;
 using AspNetCoreWebApi.DTOs.Query;
 using AspNetCoreWebApi.DTOs.Upsert;
+using AspNetCoreWebApi.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -18,8 +19,8 @@ namespace AspNetCoreWebApi.Controllers
     public class CourseController : ControllerBase
     {
         private readonly ILogger<CourseController> _logger;
-        private readonly ICourseRepository _courseRepository;
-        public CourseController(ICourseRepository courseRepository, ILogger<CourseController> logger)
+        private readonly IRepository<Course> _courseRepository;
+        public CourseController(IRepository<Course> courseRepository, ILogger<CourseController> logger)
         {
             _courseRepository = courseRepository ?? throw new ArgumentNullException(nameof(courseRepository));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -43,7 +44,7 @@ namespace AspNetCoreWebApi.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<CourseQueryDto>> Get(long id)
+        public async Task<ActionResult<CourseQueryDto>> GetById(long id)
         {
             _logger.LogInformation($"{this.GetType().Name}: Get");
             try
@@ -77,13 +78,41 @@ namespace AspNetCoreWebApi.Controllers
                 var course = await _courseRepository.Update(id, update.FromDto(), cts).ConfigureAwait(false);
                 if(course is null)
                 {
-                    return NoContent();
+                    return NotFound(update);
                 }
 
-                return new AcceptedAtActionResult(
-                    "Update", 
-                    nameof(CourseController),
+                return AcceptedAtAction(
+                    nameof(GetById), 
                     new { Id = update.CourseId},
+                    course.ToQueryDto());
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Exception occurred");
+                return StatusCode(StatusCodes.Status500InternalServerError, ex);
+            }
+        }
+
+        [HttpPost]
+        public async Task<ActionResult<CourseQueryDto>> Create([FromBody] CourseDto create)
+        {
+            _logger.LogInformation($"{this.GetType().Name}: Create");
+            try
+            {
+                if (create is null)
+                {
+                    throw new ArgumentNullException(nameof(create));
+                }
+                CancellationToken cts = new CancellationToken();
+                var course = await _courseRepository.Create(create.FromDto(), cts).ConfigureAwait(false);
+                if (course is null)
+                {
+                    return Problem("Not Created");
+                }
+
+                return CreatedAtAction(
+                    nameof(GetById),
+                    new { Id = create.CourseId },
                     course.ToQueryDto());
             }
             catch (Exception ex)
