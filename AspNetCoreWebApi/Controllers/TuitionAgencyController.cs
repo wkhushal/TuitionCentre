@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
+using AspNetCoreWebApi.Core.Interfaces;
 using AspNetCoreWebApi.DTOs.Mapper;
 using AspNetCoreWebApi.DTOs.Query;
 using AspNetCoreWebApi.Models;
@@ -16,79 +18,33 @@ namespace AspNetCoreWebApi.Controllers
     [Route("[controller]")]
     public class TuitionAgencyController : ControllerBase
     {
+        private readonly IRepository<TuitionAgency> _tuitionAgencyRepository;
         private readonly ILogger<TuitionAgencyController> _logger;
 
-        public TuitionAgencyController(ILogger<TuitionAgencyController> logger)
+        public TuitionAgencyController(IRepository<TuitionAgency> tuitionAgencyRepository, ILogger<TuitionAgencyController> logger)
         {
+            _tuitionAgencyRepository = tuitionAgencyRepository ?? throw new ArgumentNullException(nameof(tuitionAgencyRepository));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         [HttpGet]
-        public ActionResult<IEnumerable<TuitionAgencyQueryDto>> Get()
+        public async Task<ActionResult<IEnumerable<TuitionAgencyQueryDto>>> Get()
         {
             _logger.LogInformation($"{this.GetType().Name}: Get");
-            var rng = new Random();
-            return Ok(CreateTuitionAgencies().Select(agency => agency.ToQueryDto()));
-
-            IEnumerable<TuitionAgency> CreateTuitionAgencies()
+            try
             {
-                return Enumerable.Range(1, 3).Select(index => CreateAgency());
-            }
-
-            TuitionAgency CreateAgency()
-            {
-                long agencyId = rng.Next(1, 5000);
-                return new TuitionAgency
+                CancellationToken token = new CancellationToken();
+                var result = await _tuitionAgencyRepository.List(token).ConfigureAwait(false);
+                if (result is null || !result.Any())
                 {
-                    TuitionAgencyId = agencyId,
-                    Name = Guid.NewGuid().ToString(),
-                    Branches = CreateBranches(agencyId),
-                    Courses = CreateCourses(agencyId)
-                };
+                    return NoContent();
+                }
+                return Ok(result.Select(agency => agency.ToQueryDto()));
             }
-
-            ICollection<TuitionAgencyBranch> CreateBranches(long agencyId)
+            catch (Exception ex)
             {
-                return Enumerable.Range(1, 3).Select(_ =>
-                {
-                    return new TuitionAgencyBranch
-                    {
-                        TuitionAgencyBranchId = rng.Next(1, 5000),
-                        BranchAddress = Guid.NewGuid().ToString(),
-                        BranchName = Guid.NewGuid().ToString(),
-                        TuitionAgencyId = agencyId
-                    };
-                }).ToArray();
-            }
-
-            ICollection<Course> CreateCourses(long agencyId)
-            {
-                return Enumerable.Range(1, 3).Select(_ =>
-                {
-                    long courseId = rng.Next(1, 5000);
-                    return new Course
-                    {
-                        CourseId = courseId,
-                        Name = Guid.NewGuid().ToString(),
-                        TuitionAgencyId = agencyId,
-                        Subjects = CreateSubjects(courseId)
-                    };
-                }).ToArray();
-            }
-
-            ICollection<Subject> CreateSubjects(long courseId)
-            {
-                return Enumerable.Range(1, 3).Select(_ =>
-                {
-                    long courseId = rng.Next(1, 5000);
-                    return new Subject
-                    {
-                        SubjectId = courseId,
-                        Name = Guid.NewGuid().ToString(),
-                        CreditHours = rng.Next(1, 5),
-                        CourseId = courseId,
-                    };
-                }).ToArray();
+                _logger.LogError(ex, "Exception occurred");
+                return StatusCode(StatusCodes.Status500InternalServerError, ex);
             }
         }
     }

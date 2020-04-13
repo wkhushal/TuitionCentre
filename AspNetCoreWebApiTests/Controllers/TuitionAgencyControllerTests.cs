@@ -7,6 +7,7 @@ using AutoFixture.Idioms;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace AspNetCoreWebApiTests.Controllers
@@ -40,26 +41,27 @@ namespace AspNetCoreWebApiTests.Controllers
         } 
 
         [Fact]
-        public void GetAll()
+        public async Task GetAll()
         {
             Arrange();
             Action();
-            Asserts();
+            await Asserts().ConfigureAwait(false);
 
             TuitionAgencyController sut;
             void Arrange()
             {
                 sut = _fixture.Create<TuitionAgencyController>();
             }
-            ActionResult<IEnumerable<TuitionAgencyQueryDto>> actionResult;
+            Task<ActionResult<IEnumerable<TuitionAgencyQueryDto>>> actionResultTask;
             void Action()
             {
-                actionResult = sut.Get();
+                actionResultTask = sut.Get();
             }
-            void Asserts()
+            async Task Asserts()
             {
+                var actionResult = await actionResultTask.ConfigureAwait(false);
                 Assert.NotNull(actionResult);
-                Assert.IsType<OkObjectResult>(actionResult.Result);
+                Assert.IsType<NoContentResult>(actionResult.Result);
             }
         }
     }

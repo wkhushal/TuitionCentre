@@ -17,8 +17,7 @@ namespace AspNetCoreWebApi.DTOs.Query
             Subjects = subjects
                         ?.Select(item => 
                             new SubjectQueryDto(item.SubjectId, item.Name, item.CreditHours, item.CourseId))
-                        .ToList() 
-                        ?? Enumerable.Empty<SubjectQueryDto>().ToList();
+                        .ToList();
         }
 
         public long CourseId { get; set; }

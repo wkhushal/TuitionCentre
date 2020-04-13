@@ -1,11 +1,6 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Serilog;
 using Serilog.Events;
 
@@ -16,14 +11,13 @@ namespace AspNetCoreWebApi
         public static int Main(string[] args)
         {
             Log.Logger = new LoggerConfiguration()
-            .MinimumLevel.Debug()
-            .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
-            .Enrich.FromLogContext()
-            .Enrich.WithProcessId()
-            .Enrich.WithAssemblyName()
-            .WriteTo.Console()
-            .CreateLogger();
-
+                            .MinimumLevel.Debug()
+                            .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
+                            .Enrich.FromLogContext()
+                            .Enrich.WithProcessId()
+                            .Enrich.WithAssemblyName()
+                            .WriteTo.ColoredConsole()
+                            .CreateLogger();
             try
             {
                 Log.Information("Starting web host");

@@ -34,6 +34,10 @@ namespace AspNetCoreWebApi.Controllers
             {
                 CancellationToken cts = new CancellationToken();
                 var courses = await _courseRepository.List(cts).ConfigureAwait(false);
+                if (courses is null)
+                {
+                    return NoContent();
+                }
                 return Ok(courses.Select(course => course.ToQueryDto()));
             }
             catch (Exception ex)

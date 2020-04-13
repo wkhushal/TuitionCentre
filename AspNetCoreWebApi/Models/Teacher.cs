@@ -11,5 +11,6 @@ namespace AspNetCoreWebApi.Models
         public long TeacherId { get; set; }
         public TeacherType TeacherType { get; set; } = TeacherType.Permanent;
         public long PersonId { get; set; }
+        public virtual Person Person { get; set; }
     }
 }

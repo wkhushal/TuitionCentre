@@ -28,7 +28,10 @@ namespace AspNetCoreWebApi.Repositories
         public async Task<Course> Get(long id, CancellationToken token = default)
         {
             _logger.LogInformation("Get {Id}", id);
-            return await _context.Courses.FindAsync(new object[] { id }, token).ConfigureAwait(false);
+            return await _context
+                         .Courses
+                         .FindAsync(new object[] { id }, token)
+                         .ConfigureAwait(false);
         }
 
         public async Task<IEnumerable<Course>> List(CancellationToken token = default)
@@ -36,11 +39,12 @@ namespace AspNetCoreWebApi.Repositories
             _logger.LogInformation("List");
             try
             {
-                var result = await _context
-                                    .Courses
-                                    .ToListAsync(token)
-                                    .ConfigureAwait(false);
-                return result;
+                return await _context
+                            .Courses
+                            .Include(course => course.Subjects)
+                            .Include(course => course.TuitionAgency)
+                            .ToListAsync(token)
+                            .ConfigureAwait(false);
             }
             catch (DbUpdateConcurrencyException ex)
             {

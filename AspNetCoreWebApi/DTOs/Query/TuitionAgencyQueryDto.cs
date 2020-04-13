@@ -1,9 +1,7 @@
 ﻿using AspNetCoreWebApi.DTOs.Mapper;
 using AspNetCoreWebApi.Models;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace AspNetCoreWebApi.DTOs.Query
 {
@@ -13,8 +11,8 @@ namespace AspNetCoreWebApi.DTOs.Query
         {
             TuitionAgencyId = tuitionAgencyId;
             Name = name;
-            Branches = branches.Select(branch => branch.ToQueryDto()).ToList();
-            Courses = courses.Select(course => course.ToQueryDto()).ToList();
+            Branches = branches?.Select(branch => branch.ToQueryDto()).ToList();
+            Courses = courses?.Select(course => course.ToQueryDto()).ToList();
         }
 
         public long TuitionAgencyId { get; private set; }

@@ -28,7 +28,17 @@ namespace AspNetCoreWebApi
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddDbContext<TuitionAgencyContext>(opt => opt.UseInMemoryDatabase("TuitionAgencyDB"));
+            services.AddLogging(loggingBuilder =>
+            {
+                loggingBuilder.AddSerilog(dispose: true);
+            });
+
+            services.AddDbContext<TuitionAgencyContext>(opt =>
+            {
+                //opt.UseInMemoryDatabase("TuitionAgencyDB");
+                opt.UseSqlServer(Configuration.GetConnectionString("TuitionAgencyDB"));
+            });
+            
             AddRepositoryServices(services);
             services.AddAuthentication(IISDefaults.AuthenticationScheme);
             services
@@ -62,11 +72,26 @@ namespace AspNetCoreWebApi
             {
                 endpoints.MapControllers();
             });
+            
+            if (env.IsDevelopment())
+            {
+                EnsureDatabaseExists(app);
+            }
         }
 
         private void AddRepositoryServices(IServiceCollection services)
         {
             services.AddTransient(typeof(IRepository<Course>), typeof(CourseRepository));
+            services.AddTransient(typeof(IRepository<TuitionAgency>), typeof(TuitionAgencyRepository));
+        }
+
+        private void EnsureDatabaseExists(IApplicationBuilder app)
+        {
+            using (var serviceScope = app.ApplicationServices.GetRequiredService<IServiceScopeFactory>().CreateScope())
+            using (var context = serviceScope.ServiceProvider.GetService<TuitionAgencyContext>())
+            {
+                context.Database.EnsureCreated();
+            }
         }
     }
 }

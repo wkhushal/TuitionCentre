@@ -6,6 +6,7 @@ using AutoFixture.AutoMoq;
 using AutoFixture.Idioms;
 using AutoFixture.Xunit2;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -30,9 +31,11 @@ namespace AspNetCoreWebApiTests.Repositories
                 .ForEach(b => _fixture.Behaviors.Remove(b));
             _fixture.Behaviors.Add(new OmitOnRecursionBehavior());
 
-            var options = new DbContextOptionsBuilder<TuitionAgencyContext>().UseInMemoryDatabase(databaseName: _fixture.Create("CourseRepositoryTests")).Options;
-            
-            _context = new TuitionAgencyContext(options);
+            var options = new DbContextOptionsBuilder<TuitionAgencyContext>()
+                .UseInMemoryDatabase(databaseName: _fixture.Create("CourseRepositoryTests"))
+                .Options;
+            var loggerFactory = _fixture.Create<ILoggerFactory>();
+            _context = new TuitionAgencyContext(options, loggerFactory);
             _fixture.Register(() => _context);
         }
 
@@ -169,7 +172,11 @@ namespace AspNetCoreWebApiTests.Repositories
             Course create;
             void Arrange()
             {
-                create = _fixture.Create<Course>();
+                create = _fixture
+                            .Build<Course>()
+                            .Without(course => course.TuitionAgency)
+                            .Create();
+
                 sut = _fixture.Create<CourseRepository>();
             }
 
