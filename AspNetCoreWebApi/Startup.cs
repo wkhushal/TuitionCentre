@@ -11,6 +11,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Serilog;
 
 [assembly: ApiConventionType(typeof(DefaultApiConventions))]
@@ -28,6 +29,8 @@ namespace AspNetCoreWebApi
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            var loggerFactory = LoggerFactory.Create(builder => builder.AddConsole().AddFilter((_, level) => level == LogLevel.Information));
+            services.AddSingleton(typeof(ILoggerFactory), loggerFactory);
             services.AddLogging(loggingBuilder =>
             {
                 loggingBuilder.AddSerilog(dispose: true);
@@ -36,8 +39,9 @@ namespace AspNetCoreWebApi
             services.AddDbContext<TuitionAgencyContext>(opt =>
             {
                 //opt.UseInMemoryDatabase("TuitionAgencyDB");
-                opt.UseSqlServer(Configuration.GetConnectionString("TuitionAgencyDB"));
+                opt.UseSqlServer(Configuration.GetConnectionString("TuitionAgencyDB")).EnableServiceProviderCaching();
             });
+
             
             AddRepositoryServices(services);
             services.AddAuthentication(IISDefaults.AuthenticationScheme);
@@ -87,11 +91,9 @@ namespace AspNetCoreWebApi
 
         private void EnsureDatabaseExists(IApplicationBuilder app)
         {
-            using (var serviceScope = app.ApplicationServices.GetRequiredService<IServiceScopeFactory>().CreateScope())
-            using (var context = serviceScope.ServiceProvider.GetService<TuitionAgencyContext>())
-            {
-                context.Database.EnsureCreated();
-            }
+            using var serviceScope = app.ApplicationServices.GetRequiredService<IServiceScopeFactory>().CreateScope();
+            using var context = serviceScope.ServiceProvider.GetService<TuitionAgencyContext>();
+            context.Database.EnsureCreated();
         }
     }
 }
