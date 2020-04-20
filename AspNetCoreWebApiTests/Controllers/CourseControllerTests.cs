@@ -20,7 +20,7 @@ namespace AspNetCoreWebApiTests.Controllers
 {
     public class CourseControllerTests
     {
-        IFixture _fixture;
+        private readonly IFixture _fixture;
         public CourseControllerTests()
         {
             _fixture = new Fixture();

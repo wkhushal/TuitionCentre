@@ -14,7 +14,7 @@ namespace AspNetCoreWebApiTests.Controllers
 {
     public class TuitionAgencyControllerTests
     {
-        IFixture _fixture;
+        private readonly IFixture _fixture;
         
         public TuitionAgencyControllerTests() 
         {

@@ -16,7 +16,7 @@ namespace AspNetCoreWebApiTests.Controllers
 {
     public class SubjectControllerTests
     {
-        IFixture _fixture;
+        private readonly IFixture _fixture;
         public SubjectControllerTests()
         {
             _fixture = new Fixture();

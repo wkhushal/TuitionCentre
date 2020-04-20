@@ -27,6 +27,10 @@ namespace AspNetCoreWebApi.Controllers
         }
 
         [HttpGet]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(typeof(Exception), StatusCodes.Status500InternalServerError)]
+        [ProducesDefaultResponseType]
         public async Task<ActionResult<IEnumerable<CourseQueryDto>>> Get()
         {
             _logger.LogInformation($"{this.GetType().Name}: Get");
@@ -48,6 +52,10 @@ namespace AspNetCoreWebApi.Controllers
         }
 
         [HttpGet("{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(typeof(Exception), StatusCodes.Status500InternalServerError)]
+        [ProducesDefaultResponseType]
         public async Task<ActionResult<CourseQueryDto>> GetById(long id)
         {
             _logger.LogInformation($"{this.GetType().Name}: Get");
@@ -69,6 +77,10 @@ namespace AspNetCoreWebApi.Controllers
         }
 
         [HttpPost("{id}")]
+        [ProducesResponseType(StatusCodes.Status202Accepted)]
+        [ProducesResponseType(typeof(CourseDto), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(Exception), StatusCodes.Status500InternalServerError)]
+        [ProducesDefaultResponseType]
         public async Task<ActionResult<CourseQueryDto>> Update(long id, [FromBody] CourseDto update)
         {
             _logger.LogInformation($"{this.GetType().Name}: Update");

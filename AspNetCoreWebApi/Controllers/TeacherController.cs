@@ -25,20 +25,31 @@ namespace AspNetCoreWebApi.Controllers
         }
 
         [HttpGet]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(Exception), StatusCodes.Status500InternalServerError)]
+        [ProducesDefaultResponseType]
         public ActionResult<IEnumerable<TeacherQueryDto>> Get()
         {
             _logger.LogInformation($"{this.GetType().Name}: Get");
-            var rng = new Random();
-            Array values = Enum.GetValues(typeof(Enums.TeacherType));
-            return Ok(CreateTeachers().Select(teacher => teacher.ToQueryDto()));
-
+            try
+            {
+                Array values = Enum.GetValues(typeof(Enums.TeacherType));
+                return Ok(CreateTeachers()?.Select(teacher => teacher.ToQueryDto()));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Exception occurred");
+                return StatusCode(StatusCodes.Status500InternalServerError, ex);
+            }
             IEnumerable<Teacher> CreateTeachers()
             {
+                var rng = new Random();
                 return Enumerable.Range(1, 3)
-                    .Select(index => 
-                    new Teacher { 
+                    .Select(index =>
+                    new Teacher
+                    {
                         TeacherId = rng.Next(1, 5000),
-                        PersonId= rng.Next(1, 5000),
+                        PersonId = rng.Next(1, 5000),
                         TeacherType = RandomValueGenerator.RandomEnumValue<Enums.TeacherType>()
                     });
             }

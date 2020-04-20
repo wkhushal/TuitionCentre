@@ -11,7 +11,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Serilog;
 
 [assembly: ApiConventionType(typeof(DefaultApiConventions))]
@@ -29,8 +28,6 @@ namespace AspNetCoreWebApi
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            var loggerFactory = LoggerFactory.Create(builder => builder.AddConsole().AddFilter((_, level) => level == LogLevel.Information));
-            services.AddSingleton(typeof(ILoggerFactory), loggerFactory);
             services.AddLogging(loggingBuilder =>
             {
                 loggingBuilder.AddSerilog(dispose: true);
@@ -56,6 +53,7 @@ namespace AspNetCoreWebApi
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
+                app.UseCors(options => options.AllowAnyOrigin());
             }
             else
             {

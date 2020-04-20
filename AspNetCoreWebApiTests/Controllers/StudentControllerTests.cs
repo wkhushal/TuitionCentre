@@ -13,7 +13,7 @@ namespace AspNetCoreWebApiTests.Controllers
 {
     public class StudentControllerTests
     {
-        IFixture _fixture;
+        private readonly IFixture _fixture;
         public StudentControllerTests()
         {
             _fixture = new Fixture();
@@ -59,7 +59,7 @@ namespace AspNetCoreWebApiTests.Controllers
             {
                 Assert.NotNull(result);
                 var okResult = Assert.IsType<OkObjectResult>(result.Result);
-                var students = Assert.IsAssignableFrom<IEnumerable<StudentQueryDto>>(okResult.Value);
+                Assert.IsAssignableFrom<IEnumerable<StudentQueryDto>>(okResult.Value);
             }
         }
 

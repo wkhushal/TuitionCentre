@@ -10,17 +10,8 @@ namespace AspNetCoreWebApi
     {
         public static int Main(string[] args)
         {
-            Log.Logger = new LoggerConfiguration()
-                            .MinimumLevel.Debug()
-                            .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
-                            .Enrich.FromLogContext()
-                            .Enrich.WithProcessId()
-                            .Enrich.WithAssemblyName()
-                            .WriteTo.ColoredConsole()
-                            .CreateLogger();
             try
             {
-                Log.Information("Starting web host");
                 CreateHostBuilder(args).Build().Run();
                 return 0;
             }
@@ -40,6 +31,9 @@ namespace AspNetCoreWebApi
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder.UseStartup<Startup>();
-                }).UseSerilog();
+                })
+                .UseSerilog((hostingContext, loggerConfiguration) => loggerConfiguration
+                        .ReadFrom.Configuration(hostingContext.Configuration)
+                        .Enrich.FromLogContext());
     }
 }

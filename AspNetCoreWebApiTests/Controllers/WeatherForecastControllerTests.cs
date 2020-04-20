@@ -12,7 +12,7 @@ namespace AspNetCoreWebApiTests.Controllers
 {
     public class WeatherForecastControllerTests
     {
-        IFixture _fixture;
+        private readonly IFixture _fixture;
 
         public WeatherForecastControllerTests()
         {

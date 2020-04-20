@@ -28,6 +28,10 @@ namespace AspNetCoreWebApi.Controllers
         }
 
         [HttpGet]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(typeof(Exception), StatusCodes.Status500InternalServerError)]
+        [ProducesDefaultResponseType]
         public async Task<ActionResult<IEnumerable<TuitionAgencyQueryDto>>> Get()
         {
             _logger.LogInformation($"{this.GetType().Name}: Get");
